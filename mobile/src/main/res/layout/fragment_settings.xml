@@ -1,0 +1,19 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/frame"
+    android:background="@color/layoutBackground"
+    tools:context="de.smarthome_blogger.smarthome.SettingsFragment">
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/settings_list"></android.support.v7.widget.RecyclerView>
+
+    <include
+        layout="@layout/loading_animation"
+        android:visibility="gone"
+        android:id="@+id/loading_animation" />
+
+</FrameLayout>
