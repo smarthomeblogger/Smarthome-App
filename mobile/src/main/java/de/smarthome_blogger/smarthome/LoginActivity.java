@@ -58,23 +58,13 @@ public class LoginActivity extends AppCompatActivity {
                     fehlermeldung("Bitte gib die Adresse des Servers ein");
                 }
                 else{
-                    SaveData.setSaveLoginData(getApplicationContext(), saveLogin.isChecked());
-
-                    login(username, password, serverIp);
+                    login(username, password, serverIp, saveLogin.isChecked());
                 }
             }
         });
 
         //Haken je nach gespeicherten Daten setzen oder nicht
         saveLogin.setChecked(SaveData.getSaveLoginData(getApplicationContext()));
-
-        //Bei jeder Änderung neu speichren, ob Login-Daten gespeichert werden sollen
-        saveLogin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SaveData.setSaveLoginData(getApplicationContext(), isChecked);
-            }
-        });
 
         //Wenn Nutzerdaten vorhanden: automatisch einloggen
         if(SaveData.getSaveLoginData(getApplicationContext())){
@@ -90,7 +80,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 saveLogin.setChecked(true);
 
-                login(username, password, serverIp);
+                login(username, password, serverIp, saveLogin.isChecked());
             }
         }
     }
@@ -101,7 +91,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param password
      * @param serverIp
      */
-    public void login(final String username, final String password, final String serverIp){
+    public void login(final String username, final String password, final String serverIp, final boolean saveData){
         loadingAnimation.setVisibility(View.VISIBLE);
 
         Map<String, String> requestData = new HashMap<>();
@@ -121,15 +111,13 @@ public class LoginActivity extends AppCompatActivity {
                     fehlermeldung("Dieser Nutzer existiert nicht");
                 }
                 else{
-                    //gegebenenfalls Login-Daten speichern
-                    if(saveLogin.isChecked()){
-                        SaveData.setLoginData(getApplicationContext(), username, password);
-                        SaveData.setServerIp(getApplicationContext(), serverIp);
-                    }
+                    SaveData.setLoginData(getApplicationContext(), username, password, saveData);
+                    SaveData.setServerIp(getApplicationContext(), serverIp);
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     intent.putExtra(MainActivity.EXTRA_ROOMS, result);
                     startActivity(intent);
+                    finish();
                 }
             }
 

@@ -1,5 +1,6 @@
 package de.smarthome_blogger.smarthome;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -117,6 +118,13 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
+        else if(id == R.id.action_logout){
+            SaveData.deleteAllUserData(getApplicationContext());
+
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -206,7 +214,7 @@ public class MainActivity extends AppCompatActivity
             for(int i = 0; i < rooms.length(); i++){
                 JSONObject o = rooms.getJSONObject(i);
 
-                drawerItemList.add(new DrawerItem(o.getString("name"), Icons.getDrawerIcon(o.getString("location")), o.getString("location"), new RoomFragment()));
+                drawerItemList.add(new DrawerItem(o.getString("name"), Icons.getRoomIcon(o.getString("icon")), o.getString("location"), new RoomFragment()));
             }
 
             //Statischen Menüpunkt hinzufügen

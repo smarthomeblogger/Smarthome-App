@@ -113,7 +113,7 @@ public class RoomFragment extends Fragment {
                             JSONObject c = roomData.getJSONObject(i);
 
                             roomItems.add(new RoomItem(c.getString("name"), c.getString("device"), c.getString("icon"),
-                                    c.getString("type"), c.getString("value")));
+                                    c.getString("device_type"), c.getString("type"), c.getString("value")));
                         }
 
                         //Adapter setzen
@@ -147,18 +147,19 @@ public class RoomFragment extends Fragment {
 
     /**
      * Schaltet das Gerät device auf den Zustand mode
-     * @param device
+     * @param item
      * @param mode
      */
-    public void setModes(String device, boolean mode){
+    public void setModes(final RoomItem item, boolean mode){
 
     }
 
     /**
      * Zeigt Graphen für den Sensor sensor an
+     * @param type
      * @param sensor
      */
-    public void showOverview(String sensor){}
+    public void showOverview(String type, String sensor){}
 
     /**
      * Heizungs-Menü öffnen
@@ -210,7 +211,7 @@ public class RoomFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         setState = true;
-                        setModes(ri.getDevice(), !switchViewHolder.switchView.isChecked());
+                        setModes(ri, !switchViewHolder.switchView.isChecked());
                         switchViewHolder.switchView.setChecked(!switchViewHolder.switchView.isChecked());
                         setState = false;
                     }
@@ -228,7 +229,7 @@ public class RoomFragment extends Fragment {
                 sensorViewHolder.container.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        showOverview(ri.getDevice());
+                        showOverview(ri.getDeviceType(), ri.getDevice());
                     }
                 });
             }
@@ -374,14 +375,15 @@ public class RoomFragment extends Fragment {
 
     public class RoomItem{
 
-        private String name, device, icon, type, value;
+        private String name, device, icon, type, value, deviceType;
 
-        public RoomItem(String name, String device, String icon, String type, String value){
+        public RoomItem(String name, String device, String icon, String deviceType, String type, String value){
             this.name = name;
             this.device = device;
             this.icon = icon;
             this.type = type;
             this.value = value;
+            this.deviceType = deviceType;
         }
 
         /**
@@ -422,6 +424,14 @@ public class RoomFragment extends Fragment {
          */
         public String getDevice(){
             return device;
+        }
+
+        /**
+         * Gibt den Gerätetypen des Items zurück
+         * @return
+         */
+        public String getDeviceType(){
+            return deviceType;
         }
     }
 

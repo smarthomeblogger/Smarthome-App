@@ -54,4 +54,17 @@ public class Icons {
         }
     }
 
+    /**
+     * Gibt anhand des übergebenen Key's den passenden Icon zurück
+     * @param key
+     * @return
+     */
+    public static int getRoomIcon(String key){
+        //Methode wird später genauer implementiert
+        switch(key){
+            default:
+                return R.mipmap.ic_launcher;
+        }
+    }
+
 }
