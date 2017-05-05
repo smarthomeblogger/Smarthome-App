@@ -7,11 +7,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import de.smarthome_blogger.smarthome.system.HTTPRequest;
+import de.smarthome_blogger.smarthome.system.SaveData;
+
+import static de.smarthome_blogger.smarthome.system.Dialogs.fehlermeldung;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -49,13 +53,13 @@ public class LoginActivity extends AppCompatActivity {
 
                 //Eingaben auf Vollständigkeit prüfen
                 if(username.equals("")){
-                    fehlermeldung("Bitte gib deinen Nutzernamen ein");
+                    usernameField.setError("Bitte gib deinen Nutzernamen ein");
                 }
                 else if(password.equals("")){
-                    fehlermeldung("Bitte gib dein Passwort ein");
+                    passwordField.setError("Bitte gib dein Passwort ein");
                 }
                 else if(serverIp.equals("")){
-                    fehlermeldung("Bitte gib die Adresse des Servers ein");
+                    serverIpField.setError("Bitte gib die Adresse des Servers ein");
                 }
                 else{
                     login(username, password, serverIp, saveLogin.isChecked());
@@ -105,10 +109,10 @@ public class LoginActivity extends AppCompatActivity {
                 loadingAnimation.setVisibility(View.GONE);
 
                 if(result.equals("wrongdata")){
-                    fehlermeldung("Anmeldung nicht möglich! Bitte überprüfe deine Eingaben");
+                    fehlermeldung("Anmeldung nicht möglich! Bitte überprüfe deine Eingaben", findViewById(R.id.frame));
                 }
                 else if(result.equals("unknownuser")){
-                    fehlermeldung("Dieser Nutzer existiert nicht");
+                    usernameField.setError("Dieser Nutzer existiert nicht");
                 }
                 else{
                     SaveData.setLoginData(getApplicationContext(), username, password, saveData);
@@ -124,16 +128,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onError(String msg) {
                 loadingAnimation.setVisibility(View.GONE);
-                fehlermeldung(msg);
+                fehlermeldung(msg, findViewById(R.id.frame));
             }
         });
-    }
-
-    /**
-     * Zeigt die übergebene Nachricht an
-     * @param msg
-     */
-    public void fehlermeldung(String msg){
-        Snackbar.make(findViewById(R.id.frame), msg, Snackbar.LENGTH_SHORT).show();
     }
 }

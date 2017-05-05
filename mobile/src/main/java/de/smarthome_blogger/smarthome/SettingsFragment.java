@@ -24,6 +24,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.smarthome_blogger.smarthome.adapters.SettingAdapter;
+import de.smarthome_blogger.smarthome.items.SettingItem;
+import de.smarthome_blogger.smarthome.system.HTTPRequest;
+import de.smarthome_blogger.smarthome.system.Icons;
+import de.smarthome_blogger.smarthome.system.SaveData;
+
+import static de.smarthome_blogger.smarthome.system.Dialogs.fehlermeldung;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -82,10 +90,10 @@ public class SettingsFragment extends Fragment {
                 Log.i("GetSystemInfo-Result", result);
 
                 if(result.equals("wrongdata")){
-                    fehlermeldung("Anmeldung nicht möglich!\nBitte logge dich erneut ein.");
+                    fehlermeldung("Anmeldung nicht möglich!\nBitte logge dich erneut ein.", settingsView.findViewById(R.id.frame));
                 }
                 else if(result.equals("unknownuser")){
-                    fehlermeldung("Dieser Nutzer existiert nicht!\nBitte logge dich erneut ein.");
+                    fehlermeldung("Dieser Nutzer existiert nicht!\nBitte logge dich erneut ein.", settingsView.findViewById(R.id.frame));
                 }
                 else{
                     try{
@@ -110,7 +118,7 @@ public class SettingsFragment extends Fragment {
                             @Override
                             public void onClick(View v) {
                                 //Szenen-Verwaltung öffnen
-                                fehlermeldung("Szenen-Verwaltung");
+                                fehlermeldung("Szenen-Verwaltung", settingsView.findViewById(R.id.frame));
                             }
                         }));
 
@@ -118,7 +126,7 @@ public class SettingsFragment extends Fragment {
                             @Override
                             public void onClick(View v){
                                 //Nutzer-Verwaltung öffnen
-                                fehlermeldung("Nutzer-Verwaltung");
+                                fehlermeldung("Nutzer-Verwaltung", settingsView.findViewById(R.id.frame));
                             }
                         }));
 
@@ -126,17 +134,17 @@ public class SettingsFragment extends Fragment {
                             @Override
                             public void onClick(View v){
                                 //Automations-Verwaltung
-                                fehlermeldung("Automations-Verwaltung");
+                                fehlermeldung("Automations-Verwaltung", settingsView.findViewById(R.id.frame));
                             }
                         }));
 
                         //Adapter setzen
-                        settingsAdapter = new SettingsAdapter();
+                        settingsAdapter = new SettingAdapter(settingItems, getContext());
                         settingArray.setAdapter(settingsAdapter);
                         settingsAdapter.notifyDataSetChanged();
                     }
                     catch(Exception e){
-                        fehlermeldung("Fehler beim Laden der Systeminformationen");
+                        fehlermeldung("Fehler beim Laden der Systeminformationen", settingsView.findViewById(R.id.frame));
                     }
                 }
             }
@@ -144,126 +152,11 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onError(String msg) {
                 settingsView.findViewById(R.id.loading_animation).setVisibility(View.GONE);
-                fehlermeldung(msg);
+                fehlermeldung(msg, settingsView.findViewById(R.id.frame));
             }
         });
 
     }
 
-    public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-        int lastPosition = -1;
-
-        @Override
-        public int getItemCount(){
-            return settingItems.size();
-        }
-
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int i){
-            if(holder instanceof SettingViewHolder){
-                final SettingItem si = settingItems.get(i);
-                SettingViewHolder settingViewHolder = (SettingViewHolder) holder;
-
-                settingViewHolder.name.setText(si.getName());
-
-                if(!si.getValue().equals("")){
-                    settingViewHolder.value.setText(Html.fromHtml(si.getValue()));
-                }
-                else settingViewHolder.value.setText("");
-
-                settingViewHolder.icon.setImageResource(Icons.getSystemInfoIcon(si.getType()));
-
-                View.OnClickListener ocl = si.getOnClickListener();
-                if(ocl != null){
-                    settingViewHolder.container.setOnClickListener(ocl);
-                }
-
-                setAnimation(((SettingViewHolder) holder).container, i);
-            }
-        }
-
-        public void setAnimation(View viewToAnimate, int position){
-            if(position > lastPosition){
-                Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.recycler_animation);
-                viewToAnimate.startAnimation(animation);
-                lastPosition = position;
-            }
-        }
-
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType){
-            View itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.value_item, viewGroup, false);
-
-            return new SettingViewHolder(itemView);
-        }
-
-        public class SettingViewHolder extends RecyclerView.ViewHolder{
-            protected TextView value, name;
-            protected ImageView icon;
-            protected View container;
-
-            public SettingViewHolder(View v){
-                super(v);
-
-                container = v.findViewById(R.id.container);
-                value = (TextView) v.findViewById(R.id.value);
-                name = (TextView) v.findViewById(R.id.name);
-                icon = (ImageView) v.findViewById(R.id.icon);
-            }
-        }
-    }
-
-    /**
-     * Zeigt übergebene Fehlermeldung an
-     * @param msg
-     */
-    public void fehlermeldung(String msg){
-        Snackbar.make(settingsView.findViewById(R.id.frame), msg, Snackbar.LENGTH_SHORT).show();
-    }
-
-    class SettingItem{
-        private String name, type;
-        private String value;
-        private View.OnClickListener ocl;
-
-        public SettingItem(String name, String type, String value, View.OnClickListener ocl){
-            this.name = name;
-            this.type = type;
-            this.value = value;
-            this.ocl = ocl;
-        }
-
-        /**
-         * Gibt den Namen zurück
-         * @return
-         */
-        public String getName(){
-            return name;
-        }
-
-        /**
-         * Gibt den Typ zurück
-         * @return
-         */
-        public String getType(){
-            return type;
-        }
-
-        /**
-         * Gibt den Wert zurück
-         * @return
-         */
-        public String getValue(){
-            return value;
-        }
-
-        /**
-         * Gibt den OnClickListener zurück
-         * @return
-         */
-        public View.OnClickListener getOnClickListener(){
-            return ocl;
-        }
-    }
 
 }

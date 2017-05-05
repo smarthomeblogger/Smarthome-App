@@ -1,4 +1,6 @@
-package de.smarthome_blogger.smarthome;
+package de.smarthome_blogger.smarthome.system;
+
+import de.smarthome_blogger.smarthome.R;
 
 /**
  * Created by Sascha on 07.10.2016.

@@ -1,4 +1,4 @@
-package de.smarthome_blogger.smarthome;
+package de.smarthome_blogger.smarthome.system;
 
 import android.content.Context;
 import android.util.Log;

@@ -2,7 +2,6 @@ package de.smarthome_blogger.smarthome;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -25,6 +24,10 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import de.smarthome_blogger.smarthome.system.HTTPRequest;
+import de.smarthome_blogger.smarthome.system.Icons;
+import de.smarthome_blogger.smarthome.system.SaveData;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
