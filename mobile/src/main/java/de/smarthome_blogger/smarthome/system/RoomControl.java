@@ -1,8 +1,11 @@
 package de.smarthome_blogger.smarthome.system;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.view.View;
 
+import de.smarthome_blogger.smarthome.GraphActivity;
+import de.smarthome_blogger.smarthome.MainActivity;
 import de.smarthome_blogger.smarthome.items.RoomItem;
 
 /**
@@ -28,7 +31,13 @@ public class RoomControl {
      * @param location der Ort des Items
      */
     public static void showOverview(Activity activity, RoomItem item, String location){
-
+        //GraphActivity aufrufen
+        Intent intent = new Intent(activity, GraphActivity.class);
+        intent.putExtra(MainActivity.EXTRA_TITLE, item.getName());
+        intent.putExtra(MainActivity.EXTRA_LOCATION, location);
+        intent.putExtra(MainActivity.EXTRA_DEVICETYPE, item.getDeviceType());
+        intent.putExtra(MainActivity.EXTRA_DEVICE, item.getId());
+        activity.startActivity(intent);
     }
 
     /**
