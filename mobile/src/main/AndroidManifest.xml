@@ -20,7 +20,10 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".EventActivity" />
+        <activity android:name=".GraphActivity" />
+        <activity android:name=".ValueCourseActivity"></activity>
     </application>
 
 </manifest>

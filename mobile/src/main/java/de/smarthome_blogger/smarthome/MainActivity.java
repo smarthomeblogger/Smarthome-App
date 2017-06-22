@@ -1,5 +1,6 @@
 package de.smarthome_blogger.smarthome;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.smarthome_blogger.smarthome.system.Dialogs;
 import de.smarthome_blogger.smarthome.system.HTTPRequest;
 import de.smarthome_blogger.smarthome.system.Icons;
 import de.smarthome_blogger.smarthome.system.SaveData;
@@ -33,17 +35,30 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     //Intent-Keys
-    final static String EXTRA_ROOMS = "EXTA_ROOMS";
-    final static String EXTRA_TITLE = "EXTRA_TITLE";
-    final static String EXTRA_LOCATION = "EXTRA_LOCATION";
+    public final static String EXTRA_ROOMS = "EXTA_ROOMS";
+    public final static String EXTRA_TITLE = "EXTRA_TITLE";
+    public final static String EXTRA_LOCATION = "EXTRA_LOCATION";
+    public final static String EXTRA_TYPE = "EXTRA_TYPE";
+    public final static String EXTRA_DEVICETYPE = "EXTRA_DEVICETYPE";
+    public final static String EXTRA_START_DATE = "EXTRA_START_DATE";
+    public final static String EXTRA_END_DATE = "EXTRA_END_DATE";
+    public final static String EXTRA_UNIT = "EXTRA_UNIT";
+    public final static String EXTRA_DEVICE = "EXTRA_DEVICE";
+    public final static String EXTRA_ID = "EXTRA_ID";
 
     String roomData;
+
+    //Zu ladende Listenelemente
+    public final static int LOAD_ON_START = 10;
+    public final static int LOAD_ON_SCROLL = 5;
 
     //NavigationDrawer
     Menu drawerMenu;
     ArrayList<DrawerItem> drawerItemList = new ArrayList<>();
     DrawerLayout drawerLayout;
     FragmentTransaction fragmentTransaction;
+
+    Menu optionsMenu;
 
     //Header
     ImageView headerImage;
@@ -88,8 +103,8 @@ public class MainActivity extends AppCompatActivity
         try{
             onNavigationItemSelected(drawerMenu.getItem(0));
         }
-        catch(NullPointerException npe){
-            npe.printStackTrace();
+        catch(Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -107,6 +122,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
+        optionsMenu = menu;
+
         return true;
     }
 
@@ -120,6 +138,9 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+        else if(id == R.id.action_event_type){
+            loadEventTypes();
         }
         else if(id == R.id.action_logout){
             SaveData.deleteAllUserData(getApplicationContext());
@@ -150,6 +171,16 @@ public class MainActivity extends AppCompatActivity
 
         int position = menuItemArray.indexOf(item);
 
+        //Optionsitems setzen (wenn optionsMenu != null)
+        if(optionsMenu != null){
+            if(drawerItemList.get(position).getFragment() instanceof EventFragment){
+                optionsMenu.findItem(R.id.action_event_type).setVisible(true);
+            }
+            else{
+                optionsMenu.findItem(R.id.action_event_type).setVisible(false);
+            }
+        }
+
         Bundle bundle;
 
         try{
@@ -170,6 +201,105 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
+     * Lädt alle Ereignis-Typen vom Server
+     */
+    public void loadEventTypes(){
+        final Map<String, String> requestData = new HashMap<>();
+        requestData.put("action", "geteventtypes");
+        requestData.put("username", SaveData.getUsername(getApplicationContext()));
+        requestData.put("password", SaveData.getPassword(getApplicationContext()));
+
+        HTTPRequest.sendRequest(getApplicationContext(), requestData, SaveData.getServerIp(getApplicationContext()), new HTTPRequest.HTTPRequestCallback() {
+            @Override
+            public void onRequestResult(String result) {
+                switch (result){
+                    default:
+
+                        try{
+                            JSONObject types = new JSONObject(result);
+
+                            JSONArray eventTypes = types.getJSONArray("types");
+
+                            final String[] items = new String[eventTypes.length()];
+
+                            for(int i = 0; i < eventTypes.length(); i++){
+                                items[i] = eventTypes.getString(i);
+                            }
+
+                            Dialogs.singleChoiceDialog("Ereignistypen wählen", "Abbrechen", MainActivity.this, items, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent = new Intent(MainActivity.this, EventActivity.class);
+                                    intent.putExtra(MainActivity.EXTRA_TYPE, items[which]);
+                                    startActivity(intent);
+                                    dialog.dismiss();
+                                }
+                            }, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                        }
+                        catch (Exception e){
+                            e.printStackTrace();
+                            Dialogs.fehlermeldung("Ereignistypen konnten nicht geladen werden", findViewById(R.id.frame));
+                        }
+
+                        break;
+                }
+            }
+
+            @Override
+            public void onError(String msg) {
+
+            }
+        });
+    }
+
+    /**
+     * Fragt die Anzahl der ungelesenen Ereignisse vom Server ab und aktualisiert das ensprechende Drawer-Item
+     * @param indexOfEventDrawerItem Index des Drawer-Items
+     */
+    public void loadEventCount(final int indexOfEventDrawerItem){
+        Map<String, String> requestData = new HashMap<>();
+        requestData.put("action", "getunseenevents");
+        requestData.put("username", SaveData.getUsername(getApplicationContext()));
+        requestData.put("password", SaveData.getPassword(getApplicationContext()));
+
+        HTTPRequest.sendRequest(getApplicationContext(), requestData, SaveData.getServerIp(getApplicationContext()), new HTTPRequest.HTTPRequestCallback() {
+            @Override
+            public void onRequestResult(String result) {
+                switch(result){
+                    default:
+                        try{
+                            int eventCount = Integer.parseInt(result);
+
+                            if(eventCount > 0){
+                                MenuItem item = drawerMenu.getItem(indexOfEventDrawerItem);
+
+                                String title = "Ereignisse ("+eventCount+")";
+
+                                item.setTitle(title);
+
+                                drawerItemList.get(indexOfEventDrawerItem).name = title;
+                            }
+                        }
+                        catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        break;
+                }
+            }
+
+            @Override
+            public void onError(String msg) {
+                Dialogs.fehlermeldung("Anzahl der ungelesenen Ereignisse kann nicht geladen werden.", findViewById(R.id.frame));
+            }
+        });
+    }
+
+    /**
      * Lädt auf dem Server angelegte Räume und führt dann createRooms() aus
      */
     public void loadRooms(){
@@ -185,12 +315,12 @@ public class MainActivity extends AppCompatActivity
                     roomData = result;
                     createRooms(result);
                 }
-                else fehlermeldung("Serverfehler");
+                else Dialogs.fehlermeldung("Serverfehler", findViewById(R.id.frame));
             }
 
             @Override
             public void onError(String msg) {
-                fehlermeldung(msg);
+                Dialogs.fehlermeldung(msg, findViewById(R.id.frame));
             }
         });
     }
@@ -221,20 +351,29 @@ public class MainActivity extends AppCompatActivity
             }
 
             //Statischen Menüpunkt hinzufügen
+            drawerItemList.add(new DrawerItem("Ereignisse", Icons.getDrawerIcon("events"), "events", new EventFragment()));
+
+            //Zur Abfrage der Ereignisanzahl
+            int eventsIndex;
+            if(!drawerItemList.isEmpty()){
+                eventsIndex = drawerItemList.size()-1;
+
+                loadEventCount(eventsIndex);
+            }
+            else{
+                Dialogs.fehlermeldung("Anzahl der ungelesenen Ereignisse kann nicht geladen werden.", findViewById(R.id.frame));
+            }
+
             drawerItemList.add(new DrawerItem("Einstellungen", Icons.getDrawerIcon("settings"), "settings", new SettingsFragment()));
         }
         catch(Exception e){
-            fehlermeldung("Fehler beim Laden der Räume");
+            Dialogs.fehlermeldung("Fehler beim Laden der Räume", findViewById(R.id.frame));
         }
 
         for(int i = 0; i < drawerItemList.size(); i++){
             drawerMenu.add(drawerItemList.get(i).getName());
             drawerMenu.getItem(i).setIcon(drawerItemList.get(i).getIcon());
         }
-    }
-
-    public void fehlermeldung(String msg){
-        Snackbar.make(findViewById(R.id.frame), msg, Snackbar.LENGTH_SHORT).show();
     }
 
     /**

@@ -9,4 +9,5 @@
     <color name="textColorLight">#FFFFFF</color>
 
     <color name="layoutBackground">#EEEEEE</color>
+    <color name="red">#FF0000</color>
 </resources>

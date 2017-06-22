@@ -276,13 +276,13 @@ public class GraphActivity extends AppCompatActivity {
                 }
 
                 //ValueCourseActivity starten
-                /*Intent intent = new Intent(GraphActivity.this, ValueCourseActivity.class);
+                Intent intent = new Intent(GraphActivity.this, ValueCourseActivity.class);
                 intent.putExtra(MainActivity.EXTRA_START_DATE, dayList.get(index).getDate());
                 intent.putExtra(MainActivity.EXTRA_DEVICETYPE, devicetype);
                 intent.putExtra(MainActivity.EXTRA_ID, id);
                 intent.putExtra(MainActivity.EXTRA_LOCATION, location);
                 intent.putExtra(MainActivity.EXTRA_UNIT, einheit);
-                startActivity(intent);*/
+                startActivity(intent);
             }
 
             @Override
