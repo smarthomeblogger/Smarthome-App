@@ -8,6 +8,13 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_event_type"
+        android:orderInCategory="100"
+        android:title="Ereignis-Typ wählen"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_logout"
         android:orderInCategory="100"
         android:title="Ausloggen"
